@@ -1,52 +1,100 @@
-<div class="page-wrap">
-  <div class="page-header mb-4 d-flex justify-content-between align-items-center">
+<div class="perm-page">
+  <header class="page-hero">
     <div>
-      <h4 class="mb-1"><i class="bi bi-person-badge-fill me-2 text-purple"></i>Role Management</h4>
-      <small class="text-muted">Define and manage user roles — {{ roles.length }} roles</small>
+      <p class="eyebrow">Data Management · Permissions</p>
+      <h1>Role Management</h1>
+      <p class="lede">Define role codes, monitor assigned users, and keep access roles active or retired.</p>
     </div>
-    <button class="btn btn-primary" (click)="openAdd()">
-      <i class="bi bi-plus-circle me-1"></i>Add Role
+    <button class="primary-btn" type="button" (click)="openAdd()">
+      <i class="bi bi-plus-circle"></i> Add Role
     </button>
-  </div>
+  </header>
 
-  <div class="card shadow-sm">
-    <div class="card-header">
-      <input type="text" class="form-control form-control-sm w-auto d-inline-block"
-             placeholder="Search roles..." [(ngModel)]="searchText" />
+  <section class="stat-strip">
+    <article class="stat-card">
+      <span>Roles</span>
+      <strong>{{ roles.length }}</strong>
+      <small>{{ activeRoles }} active</small>
+    </article>
+    <article class="stat-card">
+      <span>Assigned users</span>
+      <strong>{{ totalUsers }}</strong>
+      <small>Across all roles</small>
+    </article>
+    <article class="stat-card">
+      <span>Showing</span>
+      <strong>{{ filtered.length }}</strong>
+      <small>After filters</small>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-toolbar">
+      <input
+        type="search"
+        class="search"
+        placeholder="Search code, name, description…"
+        [(ngModel)]="searchText"
+      />
+      <div class="filter-pills">
+        <button type="button" [class.active]="statusFilter === 'all'" (click)="statusFilter = 'all'">All</button>
+        <button type="button" [class.active]="statusFilter === 'active'" (click)="statusFilter = 'active'">Active</button>
+        <button type="button" [class.active]="statusFilter === 'inactive'" (click)="statusFilter = 'inactive'">Inactive</button>
+      </div>
     </div>
-    <div class="card-body p-0">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-dark">
+
+    <div class="table-wrap">
+      <table>
+        <thead>
           <tr>
-            <th>Code</th><th>Role Name</th><th>Description</th><th class="text-center">Users</th><th>Status</th><th class="text-end">Actions</th>
+            <th>Code</th>
+            <th>Role</th>
+            <th>Description</th>
+            <th class="center">Users</th>
+            <th>Status</th>
+            <th class="end">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let r of filtered">
-            <td><code class="text-primary fw-bold">{{ r.code }}</code></td>
-            <td class="fw-semibold">{{ r.name }}</td>
-            <td class="text-muted small">{{ r.description }}</td>
-            <td class="text-center"><span class="badge bg-info text-dark">{{ r.userCount }}</span></td>
-            <td><span class="badge" [ngClass]="r.active ? 'bg-success' : 'bg-secondary'">{{ r.active ? 'Active' : 'Inactive' }}</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(r)"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" (click)="delete(r)" [disabled]="r.userCount > 0">
+            <td><code>{{ r.code }}</code></td>
+            <td class="fw">{{ r.name }}</td>
+            <td class="muted">{{ r.description || '—' }}</td>
+            <td class="center"><span class="count">{{ r.userCount }}</span></td>
+            <td>
+              <button type="button" class="status-toggle" [class.on]="r.active" (click)="toggleActive(r)">
+                {{ r.active ? 'Active' : 'Inactive' }}
+              </button>
+            </td>
+            <td class="end">
+              <button class="icon-btn" type="button" (click)="openEdit(r)" title="Edit">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button
+                class="icon-btn danger"
+                type="button"
+                (click)="delete(r)"
+                [disabled]="r.userCount > 0"
+                title="Delete"
+              >
                 <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>
+          <tr *ngIf="!filtered.length">
+            <td colspan="6" class="empty">No roles match your filters.</td>
+          </tr>
         </tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>
 
-<!-- Modal -->
 <div class="modal-backdrop-custom" *ngIf="showModal" (click)="closeModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>{{ isEditing ? 'Edit Role' : 'Add Role' }}</h5>
-      <button class="btn-close btn-close-white" (click)="closeModal()"></button>
+      <h5 class="mb-0">{{ isEditing ? 'Edit Role' : 'Add Role' }}</h5>
+      <button class="btn-close btn-close-white" type="button" (click)="closeModal()"></button>
     </div>
     <div class="modal-card-body">
       <form [formGroup]="form">
@@ -54,6 +102,7 @@
           <div class="col-md-4">
             <label class="form-label fw-bold">Code <span class="text-danger">*</span></label>
             <input class="form-control" formControlName="code" placeholder="e.g. hq" />
+            <small class="text-muted">lowercase letters, numbers, _ or -</small>
           </div>
           <div class="col-md-8">
             <label class="form-label fw-bold">Role Name <span class="text-danger">*</span></label>
@@ -73,8 +122,8 @@
       </form>
     </div>
     <div class="modal-card-footer d-flex gap-2 justify-content-end">
-      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-      <button class="btn btn-primary px-4" [disabled]="form.invalid || isSaving" (click)="save()">
+      <button class="btn btn-secondary" type="button" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-dark px-4" type="button" [disabled]="form.invalid || isSaving" (click)="save()">
         <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
         {{ isSaving ? 'Saving...' : (isEditing ? 'Update' : 'Add Role') }}
       </button>
