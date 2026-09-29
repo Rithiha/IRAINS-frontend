@@ -1,32 +1,180 @@
-<div class="wholebody">
+<div class="stats-page">
   <app-header></app-header>
-  <div class="align-items-center d-flex justify-content-center">
-    <div class="values container gap-4 margin w-75 justify-content-center d-flex align-it flex-column mx-auto">
-      <div class="row" style="align-items: center; justify-content: center; font-weight: bold; font-size: xx-large;">
-        DAILY {{ category }} STATISTICS
+
+  <main class="stats-shell">
+    <section class="stats-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Rainfall Statistics</p>
+        <h1>Daily {{ categoryLabel }} Report</h1>
+        <p class="lede">
+          Choose a geographic level and date range, then download a structured
+          Excel report with actual, normal, and departure values.
+        </p>
       </div>
-      <hr />
-      <div class="row" style="align-items: center; justify-content: center">
-        <div class="col-md-5">
-          <label class="form-label fs-3">From Date :</label>
-          <input type="date" class="form-control" [(ngModel)]="fromDate" (ngModelChange)="validateDateRange()" placeholder="Select date"/>
-        </div>
-        <div class="col-md-5">
-          <label class="form-label fs-3">To Date :</label>
-          <input type="date" class="form-control" [(ngModel)]="toDate" (ngModelChange)="validateDateRange()" placeholder="Select date"/>
-        </div>
+
+      <div class="period-switch" aria-label="Report period">
+        <button type="button" class="period-btn active" disabled>
+          Daily
+        </button>
+        <a class="period-btn" [routerLink]="weeklyRoute">Weekly</a>
       </div>
-      <div class="row w-100">
-        <div class="col-md-2 w-25 py-3 justify-content-center d-flex flex-column mx-auto">
-          <button type="button" class="btn btn-primary py-2 mx-auto w-100 fs-5" (click)="setFromAndToDateAndView()">
-            View
-            <span *ngIf="!loading"></span>
-          <span *ngIf="loading">
-            <i class="fa fa-spinner fa-spin"></i> 
-          </span>
+    </section>
+
+    <section class="stats-panel">
+      <div class="panel-section">
+        <div class="section-head">
+          <h2>Geographic level</h2>
+          <span>Switch levels without leaving this page</span>
+        </div>
+        <div class="category-grid" role="tablist" aria-label="Statistics category">
+          <button
+            type="button"
+            class="category-chip"
+            *ngFor="let item of categories"
+            [class.active]="selectedCategory === item.value"
+            (click)="onCategoryChange(item.value)"
+            [attr.aria-selected]="selectedCategory === item.value"
+          >
+            {{ item.label }}
           </button>
         </div>
       </div>
+
+      <div class="panel-section">
+        <div class="section-head">
+          <h2>Quick ranges</h2>
+          <span>Common windows used by HQ / MC reporting</span>
+        </div>
+        <div class="preset-row">
+          <button
+            type="button"
+            class="preset-chip"
+            *ngFor="let preset of presets"
+            [class.active]="activePresetId === preset.id"
+            (click)="applyPreset(preset)"
+          >
+            {{ preset.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-section date-section">
+        <div class="section-head">
+          <h2>Custom date range</h2>
+          <span>Maximum {{ maxRangeDays }} days per download</span>
+        </div>
+
+        <div class="date-grid">
+          <label class="date-field">
+            <span>From date</span>
+            <input
+              type="date"
+              [(ngModel)]="fromDate"
+              [max]="toDate || maxDate"
+              (ngModelChange)="onDateChange()"
+            />
+          </label>
+
+          <label class="date-field">
+            <span>To date</span>
+            <input
+              type="date"
+              [(ngModel)]="toDate"
+              [min]="fromDate"
+              [max]="maxDate"
+              (ngModelChange)="onDateChange()"
+            />
+          </label>
+        </div>
+
+        <div class="range-meta" [class.invalid]="!isRangeValid">
+          <div>
+            <strong>{{ daySpan || 0 }}</strong>
+            <span>day{{ daySpan === 1 ? "" : "s" }} selected</span>
+          </div>
+          <div>
+            {{ formatDisplayDate(fromDate) }}
+            <span class="sep">→</span>
+            {{ formatDisplayDate(toDate) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="loading || !isRangeValid"
+          (click)="setFromAndToDateAndView()"
+        >
+          <span *ngIf="!loading">Generate &amp; Download Excel</span>
+          <span *ngIf="loading" class="loading-inline">
+            <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+            Preparing report…
+          </span>
+        </button>
+      </div>
+
+      <div
+        class="status-banner"
+        *ngIf="statusMessage"
+        [ngClass]="statusTone"
+        role="status"
+      >
+        {{ statusMessage }}
+      </div>
+    </section>
+
+    <section class="side-grid">
+      <article class="info-card">
+        <h3>What’s in the report</h3>
+        <ul>
+          <li>Actual rainfall (mm) for each day in range</li>
+          <li>Normal rainfall (mm) for comparison</li>
+          <li>Departure (%) versus normal</li>
+          <li>Season / period context columns where available</li>
+        </ul>
+      </article>
+
+      <article class="info-card recent-card">
+        <div class="recent-head">
+          <h3>Recent downloads</h3>
+          <button
+            type="button"
+            class="text-btn"
+            *ngIf="recentDownloads.length"
+            (click)="clearRecent()"
+          >
+            Clear
+          </button>
+        </div>
+
+        <p class="empty" *ngIf="!recentDownloads.length">
+          Your last five successful downloads in this browser session appear here.
+        </p>
+
+        <ul class="recent-list" *ngIf="recentDownloads.length">
+          <li *ngFor="let item of recentDownloads">
+            <div>
+              <strong>{{ item.label }}</strong>
+              <span>
+                {{ formatDisplayDate(item.fromDate) }}
+                –
+                {{ formatDisplayDate(item.toDate) }}
+              </span>
+            </div>
+            <small>{{ formatTime(item.at) }}</small>
+          </li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <div class="loading-veil" *ngIf="loading" aria-live="polite">
+    <div class="loading-card">
+      <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+      <p>Fetching {{ categoryLabel.toLowerCase() }} rainfall data…</p>
+      <small>Large ranges can take longer to compile.</small>
     </div>
   </div>
 </div>

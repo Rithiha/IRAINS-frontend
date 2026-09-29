@@ -251,7 +251,7 @@ export const routes: Routes = [
   { path: 'weekly-state-rf-distribution', component: RainfallStatisticsWeeklyComponent, data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'STATE'}, canActivate: [AuthGuard],  },
   { path: 'weekly-subdivision-rf-distribution', component: RainfallStatisticsWeeklyComponent,  data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'SUBDIVISION'},canActivate: [AuthGuard],  },
   { path: 'weekly-district-rf-distribution', component: RainfallStatisticsWeeklyComponent, data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'DISTRICT'}, canActivate: [AuthGuard],  },
-  { path: 'weekly-homogenous-rf-distribution', component: RainfallStatisticsWeeklyComponent,  data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'REGION '},canActivate: [AuthGuard],  },
+  { path: 'weekly-homogenous-rf-distribution', component: RainfallStatisticsWeeklyComponent,  data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'REGION'},canActivate: [AuthGuard],  },
   { path: 'weekly-country-rf-distribution', component: RainfallStatisticsWeeklyComponent,  data:{allowedUsers: ['hq', 'mc', 'public', 'sp'], category : 'COUNTRY'},canActivate: [AuthGuard],  },
 
   { path: 'weekly-departure-state-map', component: StateRainfallMapWeeklyComponent, canActivate: [AuthGuard], data: { allowedUsers: ['hq', 'mc', 'public', 'sp'] } },

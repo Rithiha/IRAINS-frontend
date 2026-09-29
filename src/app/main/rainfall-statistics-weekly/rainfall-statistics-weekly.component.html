@@ -1,54 +1,159 @@
-<div class="wholebody">
+<div class="stats-page">
   <app-header></app-header>
-  <div class="values container pt-5">
-    <div class="row text-white" style="align-items: center; justify-content: center; font-weight: bold; font-size: xx-large;">
-      WEEKLY {{ category }} STATISTICS
-    </div>
-    <hr />
 
-    <div class="row align-items-center justify-content-center">
-      <!-- Category Dropdown -->
-      <div class="col-12 col-md-5 mb-3 mb-md-0"> <!-- Adjusted for responsiveness -->
-        <mat-form-field appearance="fill" class="w-100"> <!-- Use w-100 for full width -->
-          <mat-label>Select Category</mat-label>
-          <mat-select
-            [(ngModel)]="selectedCategory"
-            (selectionChange)="onCategoryChange($event.value)"
+  <main class="stats-shell">
+    <section class="stats-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Rainfall Statistics</p>
+        <h1>Weekly {{ categoryLabel }} Report</h1>
+        <p class="lede">
+          Pick a completed Thursday–Wednesday IMD week and download the
+          aggregated Excel distribution for the selected geographic level.
+        </p>
+      </div>
+
+      <div class="period-switch" aria-label="Report period">
+        <a class="period-btn" [routerLink]="dailyRoute">Daily</a>
+        <button type="button" class="period-btn active" disabled>
+          Weekly
+        </button>
+      </div>
+    </section>
+
+    <section class="stats-panel">
+      <div class="panel-section">
+        <div class="section-head">
+          <h2>Geographic level</h2>
+          <span>Same levels as the daily statistics page</span>
+        </div>
+        <div class="category-grid" role="tablist" aria-label="Statistics category">
+          <button
+            type="button"
+            class="category-chip"
+            *ngFor="let item of categories"
+            [class.active]="selectedCategory === item.value"
+            (click)="onCategoryChange(item.value)"
+            [attr.aria-selected]="selectedCategory === item.value"
           >
-            <mat-option value="STATE">State</mat-option>
-            <mat-option value="SUBDIVISION">Subdivision</mat-option>
-            <mat-option value="DISTRICT">District</mat-option>
-            <mat-option value="REGION">Region</mat-option>
-            <mat-option value="COUNTRY">Country</mat-option>
-          </mat-select>
-        </mat-form-field>
+            {{ item.label }}
+          </button>
+        </div>
       </div>
 
-      <!-- Week Dropdown -->
-      <div class="col-12 col-md-5"> <!-- Adjusted for responsiveness -->
-        <mat-form-field appearance="fill" class="w-100"> <!-- Use w-100 for full width -->
-          <mat-label>Select Week</mat-label>
-          <mat-select [(ngModel)]="selectedWeek">
-            <mat-optgroup *ngFor="let month of months" [label]="month.name">
-              <mat-option *ngFor="let week of month.weeks" [value]="week.range">
-                {{ week.label }} ({{ week.displayRange }})
-              </mat-option>
-            </mat-optgroup>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
+      <div class="panel-section week-section">
+        <div class="section-head">
+          <h2>Week selection</h2>
+          <span>{{ weekCount }} completed week{{ weekCount === 1 ? "" : "s" }} in {{ selectedYear }}</span>
+        </div>
 
-    <div class="row d-flex justify-content-center mt-3">
-      <div class="col-md-2">
-        <button mat-raised-button color="primary" class="w-100" (click)="viewWeeklyStatistics()"> <!-- Use w-100 for full width -->
-          <span *ngIf="!loading">View</span>
-          <span *ngIf="loading" class="custom-spinner-container">
-            <mat-spinner diameter="5"></mat-spinner>
-            <span class="loading-text text-white">Loading...</span>
+        <div class="week-grid">
+          <label class="field">
+            <span>Year</span>
+            <select [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
+              <option *ngFor="let year of availableYears" [ngValue]="year">
+                {{ year }}
+              </option>
+            </select>
+          </label>
+
+          <label class="field field-wide">
+            <span>Completed week</span>
+            <select [(ngModel)]="selectedWeek">
+              <option [ngValue]="undefined" disabled>Select a week</option>
+              <optgroup *ngFor="let month of months" [label]="month.name">
+                <option *ngFor="let week of month.weeks" [value]="week.range">
+                  {{ week.label }} ({{ week.displayRange }})
+                </option>
+              </optgroup>
+            </select>
+          </label>
+        </div>
+
+        <div class="week-tools">
+          <button type="button" class="ghost-btn" (click)="selectLatestWeek()">
+            Use latest completed week
+          </button>
+          <div class="week-meta" *ngIf="selectedWeekMeta; else noWeek">
+            <strong>{{ selectedWeekMeta.label }}</strong>
+            <span>{{ selectedWeekMeta.displayRange }}</span>
+          </div>
+          <ng-template #noWeek>
+            <div class="week-meta muted">No week selected yet</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="primary-action"
+          [disabled]="loading || !selectedWeek"
+          (click)="viewWeeklyStatistics()"
+        >
+          <span *ngIf="!loading">Generate &amp; Download Excel</span>
+          <span *ngIf="loading" class="loading-inline">
+            <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+            Preparing report…
           </span>
         </button>
       </div>
+
+      <div
+        class="status-banner"
+        *ngIf="statusMessage"
+        [ngClass]="statusTone"
+        role="status"
+      >
+        {{ statusMessage }}
+      </div>
+    </section>
+
+    <section class="side-grid">
+      <article class="info-card">
+        <h3>Weekly report notes</h3>
+        <ul>
+          <li>Weeks run Thursday to Wednesday (IMD convention)</li>
+          <li>Only completed weeks are listed for download</li>
+          <li>Output aggregates rainfall for the full selected week</li>
+          <li>Use Daily mode when you need day-by-day values</li>
+        </ul>
+      </article>
+
+      <article class="info-card recent-card">
+        <div class="recent-head">
+          <h3>Recent weekly downloads</h3>
+          <button
+            type="button"
+            class="text-btn"
+            *ngIf="recentDownloads.length"
+            (click)="clearRecent()"
+          >
+            Clear
+          </button>
+        </div>
+
+        <p class="empty" *ngIf="!recentDownloads.length">
+          Successful weekly downloads from this browser session show up here.
+        </p>
+
+        <ul class="recent-list" *ngIf="recentDownloads.length">
+          <li *ngFor="let item of recentDownloads">
+            <div>
+              <strong>{{ item.label }} · {{ item.weekLabel }}</strong>
+              <span>{{ item.fromDate }} → {{ item.toDate }}</span>
+            </div>
+            <small>{{ formatTime(item.at) }}</small>
+          </li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <div class="loading-veil" *ngIf="loading" aria-live="polite">
+    <div class="loading-card">
+      <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+      <p>Compiling weekly {{ categoryLabel.toLowerCase() }} statistics…</p>
+      <small>This may take a moment for larger levels.</small>
     </div>
   </div>
 </div>
