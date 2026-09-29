@@ -1,97 +1,94 @@
-<div class="page-wrap">
-  <div class="page-header mb-4">
-    <h4 class="mb-1"><i class="bi bi-person-plus-fill me-2 text-purple"></i>New User Registration</h4>
-    <small class="text-muted">Create a new user account with role assignment</small>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-lg-7">
-      <div class="card shadow-sm">
-        <div class="card-header fw-semibold" style="background: linear-gradient(135deg,#1a0a45,#2d1a6e); color:#fff;">
-          <i class="bi bi-person-plus me-2"></i>Register New User
-        </div>
-        <div class="card-body p-4">
-
-          <div *ngIf="success" class="alert alert-success"><i class="bi bi-check-circle me-2"></i>{{ success }}</div>
-          <div *ngIf="error" class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
-
-          <form [formGroup]="form" (ngSubmit)="submit()">
-            <div class="row g-3">
-
-              <div class="col-12">
-                <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
-                <input class="form-control" formControlName="fullName" placeholder="Full name" />
-                <div *ngIf="f['fullName'].invalid && f['fullName'].touched" class="text-danger small mt-1">Minimum 3 characters required.</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" formControlName="email" placeholder="user@example.com" />
-                <div *ngIf="f['email'].invalid && f['email'].touched" class="text-danger small mt-1">Valid email required.</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Username <span class="text-danger">*</span></label>
-                <input class="form-control" formControlName="username" placeholder="username" />
-                <div *ngIf="f['username'].invalid && f['username'].touched" class="text-danger small mt-1">Minimum 4 characters.</div>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label fw-bold">Password <span class="text-danger">*</span></label>
-                <div class="input-group">
-                  <input [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="password" placeholder="Minimum 8 characters" />
-                  <button type="button" class="btn btn-outline-secondary" (click)="showPassword = !showPassword">
-                    <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
-                  </button>
-                </div>
-                <div *ngIf="f['password'].invalid && f['password'].touched" class="text-danger small mt-1">Minimum 8 characters required.</div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Role <span class="text-danger">*</span></label>
-                <select class="form-select" formControlName="role">
-                  <option value="">-- Select role --</option>
-                  <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Region</label>
-                <select class="form-select" formControlName="region">
-                  <option value="">-- Select region (optional) --</option>
-                  <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
-                </select>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Designation</label>
-                <input class="form-control" formControlName="designation" placeholder="e.g. Meteorologist" />
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Phone</label>
-                <input class="form-control" formControlName="phone" placeholder="+91 XXXXX XXXXX" />
-              </div>
-
-              <div class="col-12">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" formControlName="active" id="activeUser" />
-                  <label class="form-check-label" for="activeUser">Active Account</label>
-                </div>
-              </div>
-
-              <div class="col-12 mt-2">
-                <button type="submit" class="btn btn-primary px-5" [disabled]="form.invalid || isSaving">
-                  <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
-                  <i *ngIf="!isSaving" class="bi bi-person-check me-1"></i>
-                  {{ isSaving ? 'Registering...' : 'Register User' }}
-                </button>
-              </div>
-
-            </div>
-          </form>
-        </div>
-      </div>
+<div class="perm-page">
+  <header class="page-hero">
+    <div>
+      <p class="eyebrow">Data Management · Permissions</p>
+      <h1>New User Registration</h1>
+      <p class="lede">Create an account, assign a role, and optionally scope the user to a meteorological region.</p>
     </div>
-  </div>
+  </header>
+
+  <section class="panel form-panel">
+    <div class="panel-head">
+      <h2><i class="bi bi-person-plus"></i> Register New User</h2>
+    </div>
+
+    <div class="panel-body">
+      <div *ngIf="success" class="alert alert-success"><i class="bi bi-check-circle me-2"></i>{{ success }}</div>
+      <div *ngIf="error" class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+            <input class="form-control" formControlName="fullName" placeholder="Full name" />
+            <div *ngIf="f['fullName'].invalid && f['fullName'].touched" class="text-danger small mt-1">Minimum 3 characters required.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" formControlName="email" placeholder="user@example.com" />
+            <div *ngIf="f['email'].invalid && f['email'].touched" class="text-danger small mt-1">Valid email required.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Username <span class="text-danger">*</span></label>
+            <input class="form-control" formControlName="username" placeholder="username" />
+            <div *ngIf="f['username'].invalid && f['username'].touched" class="text-danger small mt-1">Minimum 4 characters.</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-bold">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" formControlName="password" placeholder="Minimum 8 characters" />
+              <button type="button" class="btn btn-outline-secondary" (click)="showPassword = !showPassword">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <div *ngIf="f['password'].invalid && f['password'].touched" class="text-danger small mt-1">Minimum 8 characters required.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Role <span class="text-danger">*</span></label>
+            <select class="form-select" formControlName="role">
+              <option value="">-- Select role --</option>
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Region</label>
+            <select class="form-select" formControlName="region">
+              <option value="">-- Select region (optional) --</option>
+              <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Designation</label>
+            <input class="form-control" formControlName="designation" placeholder="e.g. Meteorologist" />
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Phone</label>
+            <input class="form-control" formControlName="phone" placeholder="+91 XXXXX XXXXX" />
+          </div>
+
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" formControlName="active" id="activeUser" />
+              <label class="form-check-label" for="activeUser">Active Account</label>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <button type="submit" class="primary-btn" [disabled]="form.invalid || isSaving">
+              <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
+              <i *ngIf="!isSaving" class="bi bi-person-check me-1"></i>
+              {{ isSaving ? 'Registering...' : 'Register User' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
 </div>
